@@ -42,6 +42,10 @@ const subMenuRegistrarReservas = [
                 name: `${'Premium'.green}`
             },
             {
+                value: 'canceladas',
+                name: `${'Canceladas'.red}`
+            },
+            {
                 value: 'volver',
                 name: `${'Volver'.gray}`
             },
@@ -51,7 +55,7 @@ const subMenuRegistrarReservas = [
 
 const inquirerMenu = async () => {
     console.log("=======================================".red);
-    console.log("         SELECCIONA UNA OPCIÓN".yellow);
+    console.log("               APP HOTEL".yellow);
     console.log("=======================================".red);
 
     let otp = '';

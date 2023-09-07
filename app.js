@@ -1,28 +1,27 @@
-const colors = require('colors');
 const { inquirerMenu, pausa } = require('./helpers/inquirer');
-const Tareas = require('./models/tareas');
+const Reservas = require('./models/reservas');
 
 console.clear();
 
 const main = async () => {
     let opt = '';
-    const tareas = new Tareas();
+    const reservas = new Reservas();
     do {
         opt = await inquirerMenu();
 
         switch (opt) {
             case '1':
-                await tareas.registrarReserva();
+                await reservas.registrarReserva();
                 await pausa();
                 break;
 
             case '2':
-                await tareas.verReservas();
+                await reservas.verReservas();
                 await pausa();
                 break;
 
             case '3':
-                await tareas.cancelarReservas();
+                await reservas.cancelarReservas();
                 await pausa();
                 break;
 
