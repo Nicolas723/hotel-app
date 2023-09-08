@@ -29,39 +29,61 @@ class Tareas {
         let checkIn = null;
         let checkOut = null;
         let fechasValidas = false;
+
         while (!fechasValidas) {
             console.log('Check In:');
             console.log('Día (1-31): ');
-            const checkInDia = await leerInput();
+            const checkInDia = parseInt(await leerInput(), 10);
             console.log('Mes (1-12): ');
-            const checkInMes = await leerInput();
-            console.log('Año: ');
-            const checkInAnio = await leerInput();
+            const checkInMes = parseInt(await leerInput(), 10);
+            console.log('Año (2023-2024): ');
+            const checkInAño = parseInt(await leerInput(), 10);
 
             console.log('Check Out:');
             console.log('Día (1-31): ');
-            const checkOutDia = await leerInput();
+            const checkOutDia = parseInt(await leerInput(), 10);
             console.log('Mes (1-12): ');
-            const checkOutMes = await leerInput();
-            console.log('Año: ');
-            const checkOutAnio = await leerInput();
+            const checkOutMes = parseInt(await leerInput(), 10);
+            console.log('Año (2023-2024): ');
+            const checkOutAño = parseInt(await leerInput(), 10);
+            
+            if (
+                !isNaN(checkInDia) && !isNaN(checkInMes) && !isNaN(checkInAño) &&
+                !isNaN(checkOutDia) && !isNaN(checkOutMes) && !isNaN(checkOutAño) &&
+                checkInDia >= 1 && checkInDia <= 31 &&
+                checkInMes >= 1 && checkInMes <= 12 &&
+                checkInAño >= 2023 && checkInAño <= 2024 &&
+                checkOutDia >= 1 && checkOutDia <= 31 &&
+                checkOutMes >= 1 && checkOutMes <= 12 &&
+                checkOutAño >= 2023 && checkOutAño <= 2024
+            ) {
+                checkIn = new Date(checkInAño, checkInMes - 1, checkInDia);
+                checkOut = new Date(checkOutAño, checkOutMes - 1, checkOutDia);
 
-            checkIn = new Date(checkInAnio, checkInMes - 1, checkInDia);
-            checkOut = new Date(checkOutAnio, checkOutMes - 1, checkOutDia);
-
-            if (!isNaN(checkIn) && !isNaN(checkOut) && checkOut > checkIn) {
-                fechasValidas = true;
+                if (!isNaN(checkIn) && !isNaN(checkOut) && checkOut > checkIn) {
+                    fechasValidas = true;
+                } else {
+                    console.log('La fecha del check-out tiene que ser superior a la fecha del check-in');
+                }
             } else {
-                console.log('La fecha del check-out tiene que ser superior a la fecha del check-in');
+                console.log('Valores de fecha fuera de rango o formato incorrecto.');
             }
         }
-        console.log('Tipo de reserva (lite/premium): ');
-        const tipoReserva = await leerInput();
 
-        if (tipoReserva !== 'lite' && tipoReserva !== 'premium') {
-            console.log('Tipo de reserva no válido. Debe ser "lite" o "premium".');
+        let tipoReserva = null;
+        let tipoReservaValido = false;
+
+        while (!tipoReservaValido) {
+            console.log('Tipo de reserva (lite/premium): ');
+            const tipoReservaInput = await leerInput();
+            tipoReserva = tipoReservaInput.toLowerCase();
+
+            if (tipoReserva === 'lite' || tipoReserva === 'premium') {
+                tipoReservaValido = true;
+            } else {
+                console.log('Tipo de reserva no válido. Debe ser "lite" o "premium".');
+            }
         }
-
 
         const nuevaReserva = new Reserva(cliente, checkIn, checkOut, tipoReserva, 'activo');
         this._listado[nuevaReserva.id] = nuevaReserva;
