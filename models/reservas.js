@@ -3,7 +3,7 @@ const Reserva = require('./reserva');
 const { guardarDB, cargarDB } = require('../helpers/guardarArchivo');
 const { leerInput, subMenuRegistrarReservas } = require('../helpers/inquirer');
 
-class Tareas {
+class reservas {
 
     get listadoArr() {
         return Object.values(this._listado);
@@ -31,22 +31,27 @@ class Tareas {
         let fechasValidas = false;
 
         while (!fechasValidas) {
-            console.log('Check In:');
-            console.log('Día (1-31): ');
+            console.log('Check In:'.blue);
+            console.log(`Día (${('1-31'.green)}):`);
             const checkInDia = parseInt(await leerInput(), 10);
-            console.log('Mes (1-12): ');
+
+            console.log(`Mes (${('1-12'.green)}):`);
             const checkInMes = parseInt(await leerInput(), 10);
-            console.log('Año (2023-2024): ');
+
+            console.log(`Año (${('2023-2024'.green)}):`);
             const checkInAño = parseInt(await leerInput(), 10);
 
-            console.log('Check Out:');
-            console.log('Día (1-31): ');
+            console.log('Check Out:'.blue);
+            console.log(`Día (${('1-31'.green)}):`);
             const checkOutDia = parseInt(await leerInput(), 10);
-            console.log('Mes (1-12): ');
+
+            console.log(`Mes (${('1-12'.green)}):`);
             const checkOutMes = parseInt(await leerInput(), 10);
-            console.log('Año (2023-2024): ');
+
+            console.log(`Año (${('2023-2024'.green)}):`);
             const checkOutAño = parseInt(await leerInput(), 10);
-            
+
+
             if (
                 !isNaN(checkInDia) && !isNaN(checkInMes) && !isNaN(checkInAño) &&
                 !isNaN(checkOutDia) && !isNaN(checkOutMes) && !isNaN(checkOutAño) &&
@@ -74,7 +79,7 @@ class Tareas {
         let tipoReservaValido = false;
 
         while (!tipoReservaValido) {
-            console.log('Tipo de reserva (lite/premium): ');
+            console.log('Tipo de reserva: ' + 'LITE'.blue + ' (sin servicios extra)'.red + ' / ' + 'PREMIUM'.green + ' (comidas, spa y wifi): '.red);
             const tipoReservaInput = await leerInput();
             tipoReserva = tipoReservaInput.toLowerCase();
 
@@ -112,43 +117,64 @@ class Tareas {
     }
 
     listarReservasPorTipo(tipo) {
-        console.log(`Reservas de tipo ${tipo}:`);
-        const reservasFiltradas = Object.values(this._listado).filter((reserva) => reserva.tipoReserva === tipo);
-        reservasFiltradas.forEach((reserva, index) => {
-            console.log(`${index + 1}. Cliente: ${reserva.cliente}, Check-in: ${reserva.checkIn}, Check-out: ${reserva.checkOut}, Estado: ${reserva.estado}`);
-        });
+    let colorTipoReserva = '';
+
+    if (tipo === 'lite') {
+        colorTipoReserva = 'blue';
+    } else if (tipo === 'premium') {
+        colorTipoReserva = 'green';
     }
+
+    console.log(`Reservas de tipo ${tipo[colorTipoReserva]}:`);
+
+    const reservasFiltradas = Object.values(this._listado).filter((reserva) => reserva.tipoReserva === tipo && reserva.estado === 'activo');
+    reservasFiltradas.forEach((reserva, index) => {
+        console.log(`${index + 1}. Cliente: ${reserva.cliente[colorTipoReserva]}, Check-in: ${reserva.checkIn[colorTipoReserva]}, Check-out: ${reserva.checkOut[colorTipoReserva]}, Estado: ${reserva.estado[colorTipoReserva]}`);
+    });
+}
 
     listarReservasCanceladas() {
         console.log('Reservas Canceladas:');
         const reservasFiltradas = Object.values(this._listado).filter((reserva) => reserva.estado === 'no activo');
         reservasFiltradas.forEach((reserva, index) => {
-            console.log(`${index + 1}. Cliente: ${reserva.cliente}, Check-in: ${reserva.checkIn}, Check-out: ${reserva.checkOut}`);
+            console.log(`${index + 1}. Cliente: ${reserva.cliente.red}, Check-in: ${reserva.checkIn.red}, Check-out: ${reserva.checkOut.red}, Tipo de Reserva: ${reserva.tipoReserva.red}`);
         });
     }
 
     async cancelarReservas() {
         console.log('Reservas activas:');
         this.listarReservasPorEstado('activo');
+        const reservasActivas = Object.values(this._listado).filter((reserva) => reserva.estado === 'activo');
 
         console.log('Ingrese los números de las reservas que desea cancelar (separados por coma):');
-        const ids = await leerInput();
-        const idsArray = ids.split(',').map(id => id.trim());
+        const numerosListado = await leerInput();
+        const numerosListadoArray = numerosListado.split(',').map(num => parseInt(num.trim()));
 
-        idsArray.forEach(id => {
-            if (this._listado[id] && this._listado[id].estado === 'activo') {
-                this._listado[id].estado = 'no activo';
+        let alMenosUnaCancelada = false;
+
+        numerosListadoArray.forEach((numListado) => {
+            const reserva = reservasActivas[numListado - 1]; // Restamos 1 para ajustar el índice
+            if (reserva) {
+                reserva.estado = 'no activo';
+                alMenosUnaCancelada = true;
+            } else {
+                console.log(`No se pudo cancelar la reserva en la posición ${numListado}.`);
             }
         });
 
-        this.guardarReservas();
-        console.log('Reservas canceladas con éxito.');
+        if (alMenosUnaCancelada) {
+            this.guardarReservas();
+            console.log('Reservas canceladas con éxito.');
+        } else {
+            console.log('No se logró cancelar ninguna reserva.');
+        }
     }
+
 
     listarReservasPorEstado(estado) {
         const reservasFiltradas = Object.values(this._listado).filter((reserva) => reserva.estado === estado);
         reservasFiltradas.forEach((reserva, index) => {
-            console.log(`${index + 1}. Cliente: ${reserva.cliente}, Check-in: ${reserva.checkIn}, Check-out: ${reserva.checkOut}, Estado: ${reserva.estado}`);
+            console.log(`${index + 1}. Cliente: ${reserva.cliente.red}, Check-in: ${reserva.checkIn.red}, Check-out: ${reserva.checkOut.red}, Tipo de Reserva: ${reserva.tipoReserva.red}`);
         });
     }
 
@@ -157,4 +183,4 @@ class Tareas {
     }
 }
 
-module.exports = Tareas;
+module.exports = reservas;
